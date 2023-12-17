@@ -8,7 +8,7 @@ class TwoWayMap {
     constructor(map = {}) {
         this.map = map;
         this.reverseMap = new Map();
-        for(const key in map) {
+        for (const key in map) {
             const value = map[key];
             this.reverseMap[value] = key;
         }
@@ -76,7 +76,7 @@ let freezeFrame = {
 let file = {
     mimetype: "",
     extension: "",
-	receiving: false,
+    receiving: false,
     size: 0,
     data: [],
     valid: false,
@@ -329,7 +329,7 @@ function registerMessageHandlers() {
     registerMessageHandler(MessageDirection.ToStreamer, "StopStreaming", sendMessageToStreamer);
     registerMessageHandler(MessageDirection.ToStreamer, "LatencyTest", sendMessageToStreamer);
     registerMessageHandler(MessageDirection.ToStreamer, "RequestInitialSettings", sendMessageToStreamer);
-    registerMessageHandler(MessageDirection.ToStreamer, "TestEcho", () => { /* Do nothing */});
+    registerMessageHandler(MessageDirection.ToStreamer, "TestEcho", () => { /* Do nothing */ });
     registerMessageHandler(MessageDirection.ToStreamer, "UIInteraction", emitUIInteraction);
     registerMessageHandler(MessageDirection.ToStreamer, "Command", emitCommand);
     registerMessageHandler(MessageDirection.ToStreamer, "KeyDown", sendMessageToStreamer);
@@ -470,7 +470,7 @@ function onProtocolMessage(data) {
         }
         let direction = protocolJSON.Direction;
         delete protocolJSON.Direction;
-        console.log(`Received new ${ direction == MessageDirection.FromStreamer ? "FromStreamer" : "ToStreamer" } protocol. Updating existing protocol...`);
+        console.log(`Received new ${direction == MessageDirection.FromStreamer ? "FromStreamer" : "ToStreamer"} protocol. Updating existing protocol...`);
         Object.keys(protocolJSON).forEach((messageType) => {
             let message = protocolJSON[messageType];
             switch (direction) {
@@ -482,17 +482,17 @@ function onProtocolMessage(data) {
                         // return in a forEach is equivalent to a continue in a normal for loop
                         return;
                     }
-                    if(message.byteLength > 0 && !message.hasOwnProperty("structure")) {
+                    if (message.byteLength > 0 && !message.hasOwnProperty("structure")) {
                         // If we specify a bytelength, will must have a corresponding structure
                         console.error(`ToStreamer->${messageType} protocol definition was malformed as it specified a byteLength but no accompanying structure`);
                         // return in a forEach is equivalent to a continue in a normal for loop
                         return;
                     }
 
-					if(messageType === "GamepadAnalog") {
-						// We don't want to update the GamepadAnalog message type as UE sends it with an incorrect bytelength
-						return;
-					}
+                    if (messageType === "GamepadAnalog") {
+                        // We don't want to update the GamepadAnalog message type as UE sends it with an incorrect bytelength
+                        return;
+                    }
 
                     if (toStreamerHandlers[messageType]) {
                         // If we've registered a handler for this message type we can add it to our supported messages. ie registerMessageHandler(...)
@@ -637,72 +637,72 @@ function gamepadDisconnectHandler(e) {
 
 function fullscreen() {
     // if already full screen; exit
-  // else go fullscreen
-  if (
-    document.fullscreenElement ||
-    document.webkitFullscreenElement ||
-    document.mozFullScreenElement ||
-    document.msFullscreenElement
-  ) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-  } else {
-    let element;
-    //HTML elements controls
-    if(!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
-        // Chrome and FireFox on iOS can only fullscreen a <video>
-        element = document.getElementById("streamingVideo");
+    // else go fullscreen
+    if (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+    ) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
     } else {
-        // Everywhere else can fullscreen a <div>
-        element = document.getElementById("playerUI");
+        let element;
+        //HTML elements controls
+        if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+            // Chrome and FireFox on iOS can only fullscreen a <video>
+            element = document.getElementById("streamingVideo");
+        } else {
+            // Everywhere else can fullscreen a <div>
+            element = document.getElementById("playerUI");
+        }
+        if (!element) {
+            return;
+        }
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        } else if (element.webkitEnterFullscreen) {
+            element.webkitEnterFullscreen(); //for iphone this code worked
+        }
     }
-    if(!element) {
-        return;
-    }
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    } else if (element.webkitEnterFullscreen) {
-      element.webkitEnterFullscreen(); //for iphone this code worked
-    }
-  }
-  onFullscreenChange()
+    onFullscreenChange()
 }
 
 function onFullscreenChange() {
-	isFullscreen = (document.webkitIsFullScreen 
-		|| document.mozFullScreen 
-		|| (document.msFullscreenElement && document.msFullscreenElement !== null) 
-		|| (document.fullscreenElement && document.fullscreenElement !== null));
+    isFullscreen = (document.webkitIsFullScreen
+        || document.mozFullScreen
+        || (document.msFullscreenElement && document.msFullscreenElement !== null)
+        || (document.fullscreenElement && document.fullscreenElement !== null));
 
-	let minimize = document.getElementById('minimize');
+    let minimize = document.getElementById('minimize');
     let maximize = document.getElementById('maximize');
-	if(minimize && maximize){
-        if(isFullscreen) {
+    if (minimize && maximize) {
+        if (isFullscreen) {
             minimize.style.display = 'inline';
             maximize.style.display = 'none';
         } else {
             minimize.style.display = 'none';
             maximize.style.display = 'inline';
         }
-	}
+    }
 }
 
 function parseURLParams() {
     let urlParams = new URLSearchParams(window.location.search);
-    inputOptions.controlScheme = (urlParams.has('hoveringMouse') ?  ControlSchemeType.HoveringMouse : ControlSchemeType.LockedMouse);
+    inputOptions.controlScheme = (urlParams.has('hoveringMouse') ? ControlSchemeType.HoveringMouse : ControlSchemeType.LockedMouse);
     let schemeToggle = document.getElementById("control-scheme-text");
     switch (inputOptions.controlScheme) {
         case ControlSchemeType.HoveringMouse:
@@ -717,12 +717,12 @@ function parseURLParams() {
             break;
     }
 
-    if(urlParams.has('noWatermark')) {
+    if (urlParams.has('noWatermark')) {
         let watermark = document.getElementById("unrealengine");
         watermark.style.display = 'none';
     }
 
-    inputOptions.hideBrowserCursor = (urlParams.has('hideBrowserCursor') ?  true : false);
+    inputOptions.hideBrowserCursor = (urlParams.has('hideBrowserCursor') ? true : false);
 }
 
 
@@ -759,21 +759,21 @@ function setupHtmlEvents() {
 
     let resizeCheckBox = document.getElementById('enlarge-display-to-fill-window-tgl');
     if (resizeCheckBox !== null) {
-        resizeCheckBox.onchange = function(event) {
+        resizeCheckBox.onchange = function (event) {
             resizePlayerStyle();
         };
     }
 
     qualityControlOwnershipCheckBox = document.getElementById('quality-control-ownership-tgl');
     if (qualityControlOwnershipCheckBox !== null) {
-        qualityControlOwnershipCheckBox.onchange = function(event) {
+        qualityControlOwnershipCheckBox.onchange = function (event) {
             requestQualityControl();
         };
     }
 
     let encoderParamsSubmit = document.getElementById('encoder-params-submit');
     if (encoderParamsSubmit !== null) {
-        encoderParamsSubmit.onclick = function(event) {
+        encoderParamsSubmit.onclick = function (event) {
 
             let minQP = document.getElementById('encoder-min-qp-text').value;
             let maxQP = document.getElementById('encoder-max-qp-text').value;
@@ -785,7 +785,7 @@ function setupHtmlEvents() {
 
     let webrtcParamsSubmit = document.getElementById('webrtc-params-submit');
     if (webrtcParamsSubmit !== null) {
-        webrtcParamsSubmit.onclick = function(event) {
+        webrtcParamsSubmit.onclick = function (event) {
             let FPS = document.getElementById('webrtc-fps-text').value;
             let minBitrate = document.getElementById('webrtc-min-bitrate-text').value * 1000;
             let maxBitrate = document.getElementById('webrtc-max-bitrate-text').value * 1000;
@@ -827,7 +827,7 @@ function setupHtmlEvents() {
 
     let statsCheckBox = document.getElementById('show-stats-tgl');
     if (statsCheckBox !== null) {
-        statsCheckBox.onchange = function(event) {
+        statsCheckBox.onchange = function (event) {
             let stats = document.getElementById('statsContainer');
             stats.style.display = event.target.checked ? "block" : "none";
         };
@@ -853,7 +853,7 @@ function setupHtmlEvents() {
     var streamSelector = document.getElementById('stream-select');
     var trackSelector = document.getElementById('track-select');
     if (streamSelector) {
-        streamSelector.onchange = function(event) {
+        streamSelector.onchange = function (event) {
             const stream = webRtcPlayerObj.availableVideoStreams.get(streamSelector.value);
             webRtcPlayerObj.video.srcObject = stream;
             streamTrackSource = stream;
@@ -862,7 +862,7 @@ function setupHtmlEvents() {
         }
 
         if (trackSelector) {
-            trackSelector.onchange = function(event) {
+            trackSelector.onchange = function (event) {
                 if (!streamTrackSource) {
                     streamTrackSource = webRtcPlayerObj.availableVideoStreams.get(streamSelector.value);
                 }
@@ -881,9 +881,9 @@ function setupHtmlEvents() {
     }
 }
 
-function setupToggleWithUrlParams(toggleId, urlParameterKey){
+function setupToggleWithUrlParams(toggleId, urlParameterKey) {
     let toggleElem = document.getElementById(toggleId);
-    if(toggleElem) {
+    if (toggleElem) {
         toggleElem.checked = new URLSearchParams(window.location.search).has(urlParameterKey);
         toggleElem.addEventListener('change', (event) => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -947,7 +947,7 @@ function sendStartLatencyTest() {
         return;
     }
 
-    let onTestStarted = function(StartTimeMs) {
+    let onTestStarted = function (StartTimeMs) {
         let descriptor = {
             StartTime: StartTimeMs
         };
@@ -993,7 +993,7 @@ function setOverlay(htmlClass, htmlElement, onClickFunction) {
 function showConnectOverlay() {
     let startText = document.createElement('div');
     startText.id = 'playButton';
-    startText.innerHTML = 'Click to start'.toUpperCase();
+    //startText.innerHTML = 'Click to start'.toUpperCase();
 
     setOverlay('clickableState', startText, event => {
         connect();
@@ -1009,8 +1009,8 @@ function showTextOverlay(text) {
 }
 
 function playStream() {
-    if(webRtcPlayerObj && webRtcPlayerObj.video) {
-        if(webRtcPlayerObj.audio.srcObject && autoPlayAudio) {
+    if (webRtcPlayerObj && webRtcPlayerObj.video) {
+        if (webRtcPlayerObj.audio.srcObject && autoPlayAudio) {
             // Video and Audio are seperate tracks
             webRtcPlayerObj.audio.play().then(() => {
                 // audio play has succeeded, start playing video
@@ -1030,8 +1030,9 @@ function playStream() {
 }
 
 function playVideo() {
+    parent.postMessage("streamopened", "*");
     webRtcPlayerObj.video.play().catch((onRejectedReason) => {
-        if(webRtcPlayerObj.audio.srcObject) {
+        if (webRtcPlayerObj.audio.srcObject) {
             webRtcPlayerObj.audio.stop();
         }
         console.error(onRejectedReason);
@@ -1076,7 +1077,7 @@ function showAfkOverlay() {
         document.exitPointerLock();
     }
 
-    afk.countdownTimer = setInterval(function() {
+    afk.countdownTimer = setInterval(function () {
         afk.countdown--;
         if (afk.countdown == 0) {
             // The user failed to click so disconnect them.
@@ -1295,7 +1296,7 @@ function setupWebRtcPlayer(htmlElement, config) {
     htmlElement.appendChild(webRtcPlayerObj.audio);
     htmlElement.appendChild(freezeFrameOverlay);
 
-    webRtcPlayerObj.onWebRtcOffer = function(offer) {
+    webRtcPlayerObj.onWebRtcOffer = function (offer) {
         if (ws && ws.readyState === WS_OPEN_STATE) {
             let offerStr = JSON.stringify(offer);
             console.log("%c[Outbound SS message (offer)]", "background: lightgreen; color: black", offer);
@@ -1303,7 +1304,7 @@ function setupWebRtcPlayer(htmlElement, config) {
         }
     };
 
-    webRtcPlayerObj.onWebRtcCandidate = function(candidate) {
+    webRtcPlayerObj.onWebRtcCandidate = function (candidate) {
         if (ws && ws.readyState === WS_OPEN_STATE) {
             ws.send(JSON.stringify({
                 type: 'iceCandidate',
@@ -1327,7 +1328,7 @@ function setupWebRtcPlayer(htmlElement, config) {
         }
     };
 
-    webRtcPlayerObj.onSFURecvDataChannelReady = function() {
+    webRtcPlayerObj.onSFURecvDataChannelReady = function () {
         if (webRtcPlayerObj.sfu) {
             // Send SFU a message to let it know browser data channels are ready
             const requestMsg = { type: "peerDataChannelsReady" };
@@ -1336,7 +1337,7 @@ function setupWebRtcPlayer(htmlElement, config) {
         }
     }
 
-    webRtcPlayerObj.onVideoInitialised = function() {
+    webRtcPlayerObj.onVideoInitialised = function () {
         if (ws && ws.readyState === WS_OPEN_STATE) {
             if (shouldShowPlayOverlay) {
                 showPlayOverlay();
@@ -1356,7 +1357,7 @@ function setupWebRtcPlayer(htmlElement, config) {
         updateStreamList();
     }
 
-    webRtcPlayerObj.onDataChannelMessage = function(data) {
+    webRtcPlayerObj.onDataChannelMessage = function (data) {
         let view = new Uint8Array(data);
         try {
             let messageType = fromStreamerMessages.getFromValue(view[0]);
@@ -1380,8 +1381,8 @@ function setupWebRtcPlayer(htmlElement, config) {
     return webRtcPlayerObj.video;
 }
 
-function setupStats(){
-    webRtcPlayerObj.aggregateStats(1 * 1000 /*Check every 1 second*/ );
+function setupStats() {
+    webRtcPlayerObj.aggregateStats(1 * 1000 /*Check every 1 second*/);
 
     let printInterval = 5 * 60 * 1000; /*Print every 5 minutes*/
     let nextPrintDuration = printInterval;
@@ -1421,14 +1422,14 @@ function setupStats(){
 
         let qualityStatus = document.getElementById("connectionStrength");
         // "blinks" quality status element for 1 sec by making it transparent, speed = number of blinks
-        let blinkQualityStatus = function(speed) {
+        let blinkQualityStatus = function (speed) {
             let iter = speed;
             let opacity = 1; // [0..1]
             let tickId = setInterval(
-                function() {
+                function () {
                     opacity -= 0.1;
                     // map `opacity` to [-0.5..0.5] range, decrement by 0.2 per step and take `abs` to make it blink: 1 -> 0 -> 1
-                    qualityStatus.style.opacity =  `${Math.abs((opacity - 0.5) * 2)}`;
+                    qualityStatus.style.opacity = `${Math.abs((opacity - 0.5) * 2)}`;
                     if (opacity <= 0.1) {
                         if (--iter == 0) {
                             clearInterval(tickId);
@@ -1484,11 +1485,10 @@ function setupStats(){
 
         statsText += `<div>Duration: ${timeFormat.format(runTimeHours)}:${timeFormat.format(runTimeMinutes)}:${timeFormat.format(runTimeSeconds)}</div>`;
         statsText += `<div>Controls stream input: ${inputController === null ? "Not sent yet" : (inputController ? "true" : "false")}</div>`;
-        statsText += `<div>Audio codec: ${aggregatedStats.hasOwnProperty('audioCodec') ? aggregatedStats.audioCodec : "Not set" }</div>`;
-        statsText += `<div>Video codec: ${aggregatedStats.hasOwnProperty('videoCodec') ? aggregatedStats.videoCodec : "Not set" }</div>`;
-        statsText += `<div>Video Resolution: ${
-            aggregatedStats.hasOwnProperty('frameWidth') && aggregatedStats.frameWidth && aggregatedStats.hasOwnProperty('frameHeight') && aggregatedStats.frameHeight ?
-                aggregatedStats.frameWidth + 'x' + aggregatedStats.frameHeight : 'Chrome only'
+        statsText += `<div>Audio codec: ${aggregatedStats.hasOwnProperty('audioCodec') ? aggregatedStats.audioCodec : "Not set"}</div>`;
+        statsText += `<div>Video codec: ${aggregatedStats.hasOwnProperty('videoCodec') ? aggregatedStats.videoCodec : "Not set"}</div>`;
+        statsText += `<div>Video Resolution: ${aggregatedStats.hasOwnProperty('frameWidth') && aggregatedStats.frameWidth && aggregatedStats.hasOwnProperty('frameHeight') && aggregatedStats.frameHeight ?
+            aggregatedStats.frameWidth + 'x' + aggregatedStats.frameHeight : 'Chrome only'
             }</div>`;
         statsText += `<div>Received (${receivedBytesMeasurement}): ${numberFormat.format(receivedBytes)}</div>`;
         statsText += `<div>Frames Decoded: ${aggregatedStats.hasOwnProperty('framesDecoded') ? numberFormat.format(aggregatedStats.framesDecoded) : 'Chrome only'}</div>`;
@@ -1520,7 +1520,7 @@ function setupStats(){
         }
     };
 
-    webRtcPlayerObj.latencyTestTimings.OnAllLatencyTimingsReady = function(timings) {
+    webRtcPlayerObj.latencyTestTimings.OnAllLatencyTimingsReady = function (timings) {
 
         if (!timings.BrowserReceiptTimeMs) {
             return;
@@ -1568,7 +1568,7 @@ function onWebRtcSFUPeerDatachannels(webRTCData) {
 }
 
 function onWebRtcIce(iceCandidate) {
-    if (webRtcPlayerObj){
+    if (webRtcPlayerObj) {
         webRtcPlayerObj.handleCandidateFromServer(iceCandidate);
     }
 }
@@ -1694,7 +1694,7 @@ function invalidateFreezeFrameOverlay() {
         freezeFrame.valid = false;
         freezeFrameOverlay.classList.remove("freezeframeBackground");
     }, freezeFrameDelay);
-    
+
     if (webRtcPlayerObj) {
         webRtcPlayerObj.setVideoEnabled(true);
     }
@@ -1801,7 +1801,7 @@ function updateVideoStreamSize() {
             return;
 
         let descriptor = {
-            "Resolution.Width": playerElement.clientWidth, 
+            "Resolution.Width": playerElement.clientWidth,
             "Resolution.Height": playerElement.clientHeight
         };
         emitCommand(descriptor);
@@ -1820,14 +1820,14 @@ let _orientationChangeTimeout;
 
 function onOrientationChange(event) {
     clearTimeout(_orientationChangeTimeout);
-    _orientationChangeTimeout = setTimeout(function() {
+    _orientationChangeTimeout = setTimeout(function () {
         resizePlayerStyle();
     }, 500);
 }
 
 function sendMessageToStreamer(messageType, indata = []) {
     messageFormat = toStreamerMessages.getFromKey(messageType);
-    if(messageFormat === undefined) {
+    if (messageFormat === undefined) {
         console.error(`Attempted to send a message to the streamer with message type: ${messageType}, but the frontend hasn't been configured to send such a message. Check you've added the message type in your cpp`);
         return;
     }
@@ -1869,7 +1869,7 @@ function emitDescriptor(messageType, descriptor) {
     // Convert the descriptor object into a JSON string.
     let descriptorAsString = JSON.stringify(descriptor);
     let messageFormat = toStreamerMessages.getFromKey(messageType);
-    if(messageFormat === undefined) {
+    if (messageFormat === undefined) {
         console.error(`Attempted to emit descriptor with message type: ${messageType}, but the frontend hasn't been configured to send such a message. Check you've added the message type in your cpp`);
     }
     // Add the UTF-16 JSON string to the array byte buffer, going two bytes at
@@ -2107,7 +2107,7 @@ function createOnScreenKeyboardHelpers(htmlElement) {
         // Hide the 'edit text' button.
         editTextButton.classList.add('hiddenState');
 
-        editTextButton.addEventListener('click', function() {
+        editTextButton.addEventListener('click', function () {
             // Show the on-screen keyboard.
             hiddenInput.focus();
         });
@@ -2131,7 +2131,7 @@ function showOnScreenKeyboard(command) {
 }
 
 function registerMouseEnterAndLeaveEvents(playerElement) {
-    playerElement.onmouseenter = function(e) {
+    playerElement.onmouseenter = function (e) {
         if (print_inputs) {
             console.log('mouse enter');
         }
@@ -2139,7 +2139,7 @@ function registerMouseEnterAndLeaveEvents(playerElement) {
         playerElement.pressMouseButtons(e);
     };
 
-    playerElement.onmouseleave = function(e) {
+    playerElement.onmouseleave = function (e) {
         if (print_inputs) {
             console.log('mouse leave');
         }
@@ -2160,7 +2160,7 @@ function registerLockedMouseEvents(playerElement) {
     playerElement.requestPointerLock = playerElement.requestPointerLock || playerElement.mozRequestPointerLock;
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 
-    playerElement.onclick = function() {
+    playerElement.onclick = function () {
         playerElement.requestPointerLock();
     };
 
@@ -2226,11 +2226,11 @@ function registerLockedMouseEvents(playerElement) {
         toStreamerHandlers.MouseDown("MouseDouble", [e.button, coord.x, coord.y]);
     };
 
-    playerElement.pressMouseButtons = function(e) {
+    playerElement.pressMouseButtons = function (e) {
         pressMouseButtons(e.buttons, x, y);
     };
 
-    playerElement.releaseMouseButtons = function(e) {
+    playerElement.releaseMouseButtons = function (e) {
         releaseMouseButtons(e.buttons, x, y);
     };
 }
@@ -2282,11 +2282,11 @@ function registerHoveringMouseEvents(playerElement) {
         toStreamerHandlers.MouseDown("MouseDouble", [e.button, coord.x, coord.y]);
     };
 
-    playerElement.pressMouseButtons = function(e) {
+    playerElement.pressMouseButtons = function (e) {
         pressMouseButtons(e.buttons, e.offsetX, e.offsetY);
     };
 
-    playerElement.releaseMouseButtons = function(e) {
+    playerElement.releaseMouseButtons = function (e) {
         releaseMouseButtons(e.buttons, e.offsetX, e.offsetY);
     };
 }
@@ -2308,7 +2308,7 @@ function registerTouchEvents(playerElement) {
     function forgetTouch(touch) {
         fingers.push(fingerIds[touch.identifier]);
         // Sort array back into descending order. This means if finger '1' were to lift after finger '0', we would ensure that 0 will be the first index to pop
-        fingers.sort(function(a, b){return b - a});
+        fingers.sort(function (a, b) { return b - a });
         delete fingerIds[touch.identifier];
     }
 
@@ -2322,8 +2322,8 @@ function registerTouchEvents(playerElement) {
                 console.log(`F${fingerIds[touch.identifier]}=(${x}, ${y})`);
             }
             let coord = normalizeAndQuantizeUnsigned(x, y);
-            
-            switch(type) {
+
+            switch (type) {
                 case "TouchStart":
                     toStreamerHandlers.TouchStart("TouchStart", [numTouches, coord.x, coord.y, fingerIds[touch.identifier], MaxByteValue * touch.force, coord.inRange ? 1 : 0]);
                     break;
@@ -2341,7 +2341,7 @@ function registerTouchEvents(playerElement) {
 
         let finger = undefined;
 
-        playerElement.ontouchstart = function(e) {
+        playerElement.ontouchstart = function (e) {
             if (finger === undefined) {
                 let firstTouch = e.changedTouches[0];
                 finger = {
@@ -2359,7 +2359,7 @@ function registerTouchEvents(playerElement) {
             e.preventDefault();
         };
 
-        playerElement.ontouchend = function(e) {
+        playerElement.ontouchend = function (e) {
             for (let t = 0; t < e.changedTouches.length; t++) {
                 let touch = e.changedTouches[t];
                 if (touch.identifier === finger.id) {
@@ -2376,7 +2376,7 @@ function registerTouchEvents(playerElement) {
             e.preventDefault();
         };
 
-        playerElement.ontouchmove = function(e) {
+        playerElement.ontouchmove = function (e) {
             for (let t = 0; t < e.touches.length; t++) {
                 let touch = e.touches[t];
                 if (touch.identifier === finger.id) {
@@ -2393,7 +2393,7 @@ function registerTouchEvents(playerElement) {
             e.preventDefault();
         };
     } else {
-        playerElement.ontouchstart = function(e) {
+        playerElement.ontouchstart = function (e) {
             // Assign a unique identifier to each touch.
             for (let t = 0; t < e.changedTouches.length; t++) {
                 rememberTouch(e.changedTouches[t]);
@@ -2406,7 +2406,7 @@ function registerTouchEvents(playerElement) {
             e.preventDefault();
         };
 
-        playerElement.ontouchend = function(e) {
+        playerElement.ontouchend = function (e) {
             if (print_inputs) {
                 console.log('touch end');
             }
@@ -2419,7 +2419,7 @@ function registerTouchEvents(playerElement) {
             e.preventDefault();
         };
 
-        playerElement.ontouchmove = function(e) {
+        playerElement.ontouchmove = function (e) {
             if (print_inputs) {
                 console.log('touch move');
             }
@@ -2457,7 +2457,7 @@ function getKeyCode(e) {
 }
 
 function registerKeyboardEvents() {
-    document.onkeydown = function(e) {
+    document.onkeydown = function (e) {
         if (print_inputs) {
             console.log(`key down ${e.keyCode}, repeat = ${e.repeat}`);
         }
@@ -2475,7 +2475,7 @@ function registerKeyboardEvents() {
         }
     };
 
-    document.onkeyup = function(e) {
+    document.onkeyup = function (e) {
         if (print_inputs) {
             console.log(`key up ${e.keyCode}`);
         }
@@ -2485,7 +2485,7 @@ function registerKeyboardEvents() {
         }
     };
 
-    document.onkeypress = function(e) {
+    document.onkeypress = function (e) {
         if (print_inputs) {
             console.log(`key press ${e.charCode}`);
         }
@@ -2493,30 +2493,28 @@ function registerKeyboardEvents() {
     };
 }
 
-function settingsClicked( /* e */ ) {
+function settingsClicked( /* e */) {
     /**
      * Toggle settings panel. If stats panel is already open, close it and then open settings
      */
     let settings = document.getElementById('settings-panel');
     let stats = document.getElementById('stats-panel');
 
-    if(stats.classList.contains("panel-wrap-visible"))
-    {
+    if (stats.classList.contains("panel-wrap-visible")) {
         stats.classList.toggle("panel-wrap-visible");
     }
 
     settings.classList.toggle("panel-wrap-visible");
 }
 
-function statsClicked( /* e */ ) {
+function statsClicked( /* e */) {
     /**
      * Toggle stats panel. If settings panel is already open, close it and then open stats
      */
     let settings = document.getElementById('settings-panel');
     let stats = document.getElementById('stats-panel');
 
-    if(settings.classList.contains("panel-wrap-visible"))
-    {
+    if (settings.classList.contains("panel-wrap-visible")) {
         settings.classList.toggle("panel-wrap-visible");
     }
 
@@ -2537,11 +2535,11 @@ function start(isReconnection) {
     if (statsDiv) {
         statsDiv.innerHTML = 'Not connected';
     }
+    shouldShowPlayOverlay = isReconnection;
 
     if (!connect_on_load || isReconnection) {
         showConnectOverlay();
         invalidateFreezeFrameOverlay();
-        shouldShowPlayOverlay = true;
         resizePlayerStyle();
     } else {
         connect();
@@ -2564,21 +2562,21 @@ function connect() {
     ws = new WebSocket(connectionUrl);
     ws.attemptStreamReconnection = true;
 
-    ws.onmessagebinary = function(event) {
-        if(!event || !event.data) { return; }
+    ws.onmessagebinary = function (event) {
+        if (!event || !event.data) { return; }
 
-        event.data.text().then(function(messageString){
+        event.data.text().then(function (messageString) {
             // send the new stringified event back into `onmessage`
             ws.onmessage({ data: messageString });
-        }).catch(function(error){
+        }).catch(function (error) {
             console.error(`Failed to parse binary blob from websocket, reason: ${error}`);
         });
     }
 
-    ws.onmessage = function(event) {
+    ws.onmessage = function (event) {
 
         // Check if websocket message is binary, if so, stringify it.
-        if(event.data && event.data instanceof Blob) {
+        if (event.data && event.data instanceof Blob) {
             ws.onmessagebinary(event);
             return;
         }
@@ -2599,7 +2597,7 @@ function connect() {
             onWebRtcAnswer(msg);
         } else if (msg.type === 'iceCandidate') {
             onWebRtcIce(msg.candidate);
-        } else if(msg.type === 'warning' && msg.warning) {
+        } else if (msg.type === 'warning' && msg.warning) {
             console.warn(msg.warning);
         } else if (msg.type === 'peerDataChannels') {
             onWebRtcSFUPeerDatachannels(msg);
@@ -2608,27 +2606,25 @@ function connect() {
         }
     };
 
-    ws.onerror = function(event) {
+    ws.onerror = function (event) {
         console.log(`WS error: ${JSON.stringify(event)}`);
     };
 
-    ws.onclose = function(event) {
+    ws.onclose = function (event) {
 
         closeStream();
 
-        if(ws.attemptStreamReconnection === true){
+        if (ws.attemptStreamReconnection === true) {
             console.log(`WS closed: ${JSON.stringify(event.code)} - ${event.reason}`);
-            if(event.reason !== "")
-            {
+            if (event.reason !== "") {
                 showTextOverlay(`DISCONNECTED: ${event.reason.toUpperCase()}`);
             }
-            else
-            {
+            else {
                 showTextOverlay(`DISCONNECTED`);
             }
-            
 
-            let reclickToStart = setTimeout(function(){
+
+            let reclickToStart = setTimeout(function () {
                 start(true)
             }, 4000);
         }
@@ -2676,7 +2672,7 @@ function clearMouseEvents(playerElement) {
 
 function toggleControlScheme() {
     let schemeToggle = document.getElementById("control-scheme-text");
-    
+
     switch (inputOptions.controlScheme) {
         case ControlSchemeType.HoveringMouse:
             inputOptions.controlScheme = ControlSchemeType.LockedMouse;
@@ -2694,8 +2690,7 @@ function toggleControlScheme() {
     }
 
     console.log(`Updating control scheme to: ${inputOptions.controlScheme ? "Hovering Mouse" : "Locked Mouse"}`)
-    if(webRtcPlayerObj && webRtcPlayerObj.video)
-    {
+    if (webRtcPlayerObj && webRtcPlayerObj.video) {
         registerMouse(webRtcPlayerObj.video);
     }
 }
@@ -2708,14 +2703,14 @@ function toggleBrowserCursorVisibility() {
 }
 
 function restartStream() {
-    if(!ws){
+    if (!ws) {
         return;
     }
     ws.attemptStreamReconnection = false;
 
     let existingOnClose = ws.onclose;
 
-    ws.onclose = function(event) {
+    ws.onclose = function (event) {
         existingOnClose(event);
         // this is how we restart
         connect_on_load = true;
@@ -2728,10 +2723,11 @@ function restartStream() {
 
 function closeStream() {
     console.log("----------------------Closing stream----------------------")
+    shouldShowPlayOverlay = true;
     if (webRtcPlayerObj) {
         // Remove video element from the page.
         let playerDiv = document.getElementById('player');
-        if(playerDiv){
+        if (playerDiv) {
             playerDiv.removeChild(webRtcPlayerObj.video);
         }
         let outer = document.getElementById("outer");
@@ -2746,6 +2742,7 @@ function closeStream() {
         webRtcPlayerObj.close();
         webRtcPlayerObj = undefined;
     }
+    parent.postMessage("streamclosed", "*");
 }
 
 function load() {
@@ -2756,6 +2753,6 @@ function load() {
     setupFreezeFrameOverlay();
     registerKeyboardEvents();
     // Example response event listener that logs to console
-    addResponseEventListener('logListener', (response) => {console.log(`Received response message from streamer: "${response}"`)})
+    addResponseEventListener('logListener', (response) => { console.log(`Received response message from streamer: "${response}"`) })
     start(false);
 }

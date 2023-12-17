@@ -161,7 +161,9 @@ try {
 }
 
 if (config.UseHTTPS) {
-	app.use(helmet());
+	app.use(helmet({
+		frameguard: false,
+	}));
 
 	app.use(hsts({
 		maxAge: 15552000  // 180 days in seconds
@@ -190,9 +192,9 @@ if (config.UseHTTPS) {
 sendGameSessionData();
 
 //Setup the login page if we are using authentication
-if(config.UseAuthentication){
-	if(config.EnableWebserver) {
-		app.get('/login', function(req, res){
+if (config.UseAuthentication) {
+	if (config.EnableWebserver) {
+		app.get('/login', function (req, res) {
 			res.sendFile(__dirname + '/login.htm');
 		});
 	}
@@ -201,10 +203,10 @@ if(config.UseAuthentication){
 	var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 	//login page form data is posted here
-	app.post('/login', 
-		urlencodedParser, 
-		passport.authenticate('local', { failureRedirect: '/login' }), 
-		function(req, res){
+	app.post('/login',
+		urlencodedParser,
+		passport.authenticate('local', { failureRedirect: '/login' }),
+		function (req, res) {
 			//On success try to redirect to the page that they originally tired to get to, default to '/' if no redirect was found
 			var redirectTo = req.session.redirectTo ? req.session.redirectTo : '/';
 			delete req.session.redirectTo;
@@ -214,11 +216,11 @@ if(config.UseAuthentication){
 	);
 }
 
-if(config.EnableWebserver) {
+if (config.EnableWebserver) {
 	//Setup folders
 	app.use(express.static(path.join(__dirname, '/Public')))
 	app.use('/images', express.static(path.join(__dirname, './images')))
-	app.use('/scripts', [isAuthenticated('/login'),express.static(path.join(__dirname, '/scripts'))]);
+	app.use('/scripts', [isAuthenticated('/login'), express.static(path.join(__dirname, '/scripts'))]);
 	app.use('/', [isAuthenticated('/login'), express.static(path.join(__dirname, '/custom_html'))])
 }
 
@@ -233,17 +235,17 @@ try {
 	console.error(`reading config.AdditionalRoutes: ${err}`)
 }
 
-if(config.EnableWebserver) {
+if (config.EnableWebserver) {
 
 	// Request has been sent to site root, send the homepage file
 	app.get('/', isAuthenticated('/login'), function (req, res) {
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
-		
-		let pathsToTry = [ path.join(__dirname, homepageFile), path.join(__dirname, '/Public', homepageFile), path.join(__dirname, '/custom_html', homepageFile), homepageFile ];
+
+		let pathsToTry = [path.join(__dirname, homepageFile), path.join(__dirname, '/Public', homepageFile), path.join(__dirname, '/custom_html', homepageFile), homepageFile];
 
 		// Try a few paths, see if any resolve to a homepage file the user has set
-		for(let pathToTry of pathsToTry){
-			if(fs.existsSync(pathToTry)){
+		for (let pathToTry of pathsToTry) {
+			if (fs.existsSync(pathToTry)) {
 				// Send the file for browser to display it
 				res.sendFile(pathToTry);
 				return;
@@ -301,12 +303,12 @@ function sendMessageToController(msg, skipSFU, skipStreamer = false) {
 	if (sfu && sfu.readyState == 1 && !skipSFU) {
 		logOutgoing("SFU", msg.type, rawMsg);
 		sfu.send(rawMsg);
-	} 
+	}
 	if (streamer && streamer.readyState == 1 && !skipStreamer) {
 		logOutgoing("Streamer", msg.type, rawMsg);
 		streamer.send(rawMsg);
-	} 
-	
+	}
+
 	if (!sfu && !streamer) {
 		console.error("sendMessageToController: No streamer or SFU connected!\nMSG: %s", rawMsg);
 	}
@@ -332,7 +334,7 @@ let streamerServer = new WebSocket.Server({ port: streamerPort, backlog: 1 });
 streamerServer.on('connection', function (ws, req) {
 
 	// Check if we have an already existing connection to a streamer, if so, deny a new streamer connecting.
-	if(streamer != null){
+	if (streamer != null) {
 		/* We send a 1008 because that a "policy violation", which similar enough to what is happening here. */
 		ws.close(1008, 'Cirrus supports only 1 streamer being connected, already one connected, so dropping this new connection.');
 		console.logColor(logging.Yellow, `Dropping new streamer connection, we already have a connected streamer`);
@@ -347,18 +349,18 @@ streamerServer.on('connection', function (ws, req) {
 		var msg;
 		try {
 			msg = JSON.parse(msgRaw);
-		} catch(err) {
+		} catch (err) {
 			console.error(`cannot parse Streamer message: ${msgRaw}\nError: ${err}`);
 			streamer.close(1008, 'Cannot parse');
 			return;
 		}
 
 		logIncoming("Streamer", msg.type, msgRaw);
-	
+
 		try {
 			// just send pings back to sender
 			if (msg.type == 'ping') {
-				const rawMsg = JSON.stringify({ type: "pong", time: msg.time});
+				const rawMsg = JSON.stringify({ type: "pong", time: msg.time });
 				logOutgoing("Streamer", msg.type, rawMsg);
 				ws.send(rawMsg);
 				return;
@@ -366,8 +368,7 @@ streamerServer.on('connection', function (ws, req) {
 
 			// Convert incoming playerId to a string if it is an integer, if needed. (We support receiving it as an int or string).
 			let playerId = msg.playerId;
-			if (playerId && typeof playerId === 'number')
-			{
+			if (playerId && typeof playerId === 'number') {
 				playerId = playerId.toString();
 			}
 			delete msg.playerId; // no need to send it to the player
@@ -386,7 +387,7 @@ streamerServer.on('connection', function (ws, req) {
 			} else {
 				console.error(`unsupported Streamer message type: ${msg.type}`);
 			}
-		} catch(err) {
+		} catch (err) {
 			console.error(`ERROR: ws.on message error: ${err.message}`);
 		}
 	});
@@ -400,18 +401,18 @@ streamerServer.on('connection', function (ws, req) {
 		}
 		streamer = null;
 	}
-	
-	ws.on('close', function(code, reason) {
+
+	ws.on('close', function (code, reason) {
 		console.error(`streamer disconnected: ${code} - ${reason}`);
 		onStreamerDisconnected();
 	});
 
-	ws.on('error', function(error) {
+	ws.on('error', function (error) {
 		console.error(`streamer connection error: ${error}`);
 		onStreamerDisconnected();
 		try {
 			ws.close(1006 /* abnormal closure */, error);
-		} catch(err) {
+		} catch (err) {
 			console.error(`ERROR: ws.on error: ${err.message}`);
 		}
 	});
@@ -427,7 +428,7 @@ streamerServer.on('connection', function (ws, req) {
 });
 
 console.logColor(logging.Green, `WebSocket listening for SFU connections on :${sfuPort}`);
-let sfuServer = new WebSocket.Server({ port: sfuPort});
+let sfuServer = new WebSocket.Server({ port: sfuPort });
 sfuServer.on('connection', function (ws, req) {
 	// reject if we already have an sfu
 	if (sfuIsConnected()) {
@@ -480,19 +481,19 @@ sfuServer.on('connection', function (ws, req) {
 		}
 	});
 
-	ws.on('close', function(code, reason) {
+	ws.on('close', function (code, reason) {
 		console.error(`SFU disconnected: ${code} - ${reason}`);
 		sfu = null;
 		disconnectSFUPlayer();
 	});
 
-	ws.on('error', function(error) {
+	ws.on('error', function (error) {
 		console.error(`SFU connection error: ${error}`);
 		sfu = null;
 		disconnectSFUPlayer();
 		try {
 			ws.close(1006 /* abnormal closure */, error);
-		} catch(err) {
+		} catch (err) {
 			console.error(`ERROR: ws.on error: ${err.message}`);
 		}
 	});
@@ -509,7 +510,7 @@ sfuServer.on('connection', function (ws, req) {
 let playerCount = 0;
 
 console.logColor(logging.Green, `WebSocket listening for Players connections on :${httpPort}`);
-let playerServer = new WebSocket.Server({ server: config.UseHTTPS ? https : http});
+let playerServer = new WebSocket.Server({ server: config.UseHTTPS ? https : http });
 playerServer.on('connection', function (ws, req) {
 	// Reject connection if streamer is not connected
 	if (!streamer || streamer.readyState != 1 /* OPEN */) {
@@ -524,12 +525,11 @@ playerServer.on('connection', function (ws, req) {
 	const skipSFU = !preferSFU;
 	const skipStreamer = preferSFU && sfu;
 
-	if(preferSFU && !sfu) {
+	if (preferSFU && !sfu) {
 		ws.send(JSON.stringify({ type: "warning", warning: "Even though ?preferSFU was specified, there is currently no SFU connected." }));
 	}
 
-	if(playerCount + 1 > maxPlayerCount && maxPlayerCount !== -1)
-	{
+	if (playerCount + 1 > maxPlayerCount && maxPlayerCount !== -1) {
 		console.logColor(logging.Red, `new connection would exceed number of allowed concurrent connections. Max: ${maxPlayerCount}, Current ${playerCount}`);
 		ws.close(1013, `too many connections. max: ${maxPlayerCount}, current: ${playerCount}`);
 		return;
@@ -546,8 +546,8 @@ playerServer.on('connection', function (ws, req) {
 			p.ws.send(playerCountMsg);
 		}
 	}
-	
-	ws.on('message', (msgRaw) =>{
+
+	ws.on('message', (msgRaw) => {
 
 		var msg;
 		try {
@@ -558,12 +558,11 @@ playerServer.on('connection', function (ws, req) {
 			return;
 		}
 
-		if(!msg || !msg.type)
-		{
+		if (!msg || !msg.type) {
 			console.error(`Cannot parse message ${msgRaw}`);
 			return;
 		}
-		
+
 		logIncoming(`player ${playerId}`, msg.type, msgRaw);
 
 		if (msg.type == 'offer') {
@@ -603,17 +602,17 @@ playerServer.on('connection', function (ws, req) {
 			sendPlayerDisconnectedToFrontend();
 			sendPlayerDisconnectedToMatchmaker();
 			sendPlayersCount();
-		} catch(err) {
+		} catch (err) {
 			console.logColor(logging.Red, `ERROR:: onPlayerDisconnected error: ${err.message}`);
 		}
 	}
 
-	ws.on('close', function(code, reason) {
+	ws.on('close', function (code, reason) {
 		console.logColor(logging.Yellow, `player ${playerId} connection closed: ${code} - ${reason}`);
 		onPlayerDisconnected();
 	});
 
-	ws.on('error', function(error) {
+	ws.on('error', function (error) {
 		console.error(`player ${playerId} connection error: ${error}`);
 		ws.close(1006 /* abnormal closure */, error);
 		onPlayerDisconnected();
@@ -643,7 +642,7 @@ function disconnectAllPlayers(code, reason) {
 
 function disconnectSFUPlayer() {
 	console.log("disconnecting SFU from streamer");
-	if(players.has(SFUPlayerId)) {
+	if (players.has(SFUPlayerId)) {
 		players.get(SFUPlayerId).ws.close(4000, "SFU Disconnected");
 		players.delete(SFUPlayerId);
 	}
@@ -657,7 +656,7 @@ function disconnectSFUPlayer() {
 if (config.UseMatchmaker) {
 	var matchmaker = new net.Socket();
 
-	matchmaker.on('connect', function() {
+	matchmaker.on('connect', function () {
 		console.log(`Cirrus connected to Matchmaker ${matchmakerAddress}:${matchmakerPort}`);
 
 		// message.playerConnected is a new variable sent from the SS to help track whether or not a player 
@@ -666,7 +665,7 @@ if (config.UseMatchmaker) {
 		var playerConnected = false;
 
 		// Set the playerConnected flag to tell the MM if there is already a player active (i.e., don't send a new one here)
-		if( players && players.size > 0) {
+		if (players && players.size > 0) {
 			playerConnected = true;
 		}
 
@@ -692,8 +691,8 @@ if (config.UseMatchmaker) {
 
 	matchmaker.on('close', (hadError) => {
 		console.logColor(logging.Blue, 'Setting Keep Alive to true');
-        matchmaker.setKeepAlive(true, 60000); // Keeps it alive for 60 seconds
-		
+		matchmaker.setKeepAlive(true, 60000); // Keeps it alive for 60 seconds
+
 		console.log(`Matchmaker connection closed (hadError=${hadError})`);
 
 		reconnect();
@@ -707,13 +706,13 @@ if (config.UseMatchmaker) {
 	// Try to reconnect to the Matchmaker after a given period of time
 	function reconnect() {
 		console.log(`Try reconnect to Matchmaker in ${matchmakerRetryInterval} seconds`)
-		setTimeout(function() {
+		setTimeout(function () {
 			connect();
 		}, matchmakerRetryInterval * 1000);
 	}
 
 	function registerMMKeepAlive() {
-		setInterval(function() {
+		setInterval(function () {
 			message = {
 				type: 'ping'
 			};
@@ -808,7 +807,7 @@ function sendServerDisconnect() {
 					console.error(err);
 				}
 			});
-	} catch(err) {
+	} catch (err) {
 		console.logColor(logging.Red, `ERROR::: sendServerDisconnect error: ${err.message}`);
 	}
 }
@@ -838,7 +837,7 @@ function sendPlayerConnectedToFrontend() {
 					console.error(err);
 				}
 			});
-	} catch(err) {
+	} catch (err) {
 		console.logColor(logging.Red, `ERROR::: sendPlayerConnectedToFrontend error: ${err.message}`);
 	}
 }
@@ -869,7 +868,7 @@ function sendPlayerDisconnectedToFrontend() {
 					console.error(err);
 				}
 			});
-	} catch(err) {
+	} catch (err) {
 		console.logColor(logging.Red, `ERROR::: sendPlayerDisconnectedToFrontend error: ${err.message}`);
 	}
 }
@@ -888,8 +887,7 @@ function sendStreamerConnectedToMatchmaker() {
 }
 
 function sendStreamerDisconnectedToMatchmaker() {
-	if (!config.UseMatchmaker)
-	{
+	if (!config.UseMatchmaker) {
 		return;
 	}
 
@@ -897,7 +895,7 @@ function sendStreamerDisconnectedToMatchmaker() {
 		message = {
 			type: 'streamerDisconnected'
 		};
-		matchmaker.write(JSON.stringify(message));	
+		matchmaker.write(JSON.stringify(message));
 	} catch (err) {
 		console.logColor(logging.Red, `ERROR sending streamerDisconnected: ${err.message}`);
 	}
