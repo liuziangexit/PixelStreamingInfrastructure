@@ -17,10 +17,7 @@ function webRtcPlayer(parOptions) {
     // tdlr; uncomment this line for older versions of Pixel Streaming that need Chrome 89+.
     this.cfg.offerExtmapAllowMixed = false;
 
-    //this.forceTURN = urlParams.has('ForceTURN');
-    // liuziang 20230918
-    // 我们现在必须强制从turnserver转发，从而达到指定端口范围的目的
-    this.forceTURN = true;
+    this.forceTURN = urlParams.has('ForceTURN');
     if(this.forceTURN)
     {
         console.log("Forcing TURN usage by setting ICE Transport Policy in peer connection config.");
@@ -553,7 +550,6 @@ function webRtcPlayer(parOptions) {
 
     //This is called when revceiving new ice candidates individually instead of part of the offer
     this.handleCandidateFromServer = function(iceCandidate) {
-        iceCandidate.candidate = iceCandidate.candidate.replace('{listen_host}', '{access_host}');
         let candidate = new RTCIceCandidate(iceCandidate);
 
         console.log("%c[Unreal ICE candidate]", "background: pink; color: black" ,"| Type=", candidate.type, "| Protocol=", candidate.protocol, "| Address=", candidate.address, "| Port=", candidate.port, "|");
