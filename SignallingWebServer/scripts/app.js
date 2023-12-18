@@ -993,7 +993,7 @@ function setOverlay(htmlClass, htmlElement, onClickFunction) {
 function showConnectOverlay() {
     let startText = document.createElement('div');
     startText.id = 'playButton';
-    startText.innerHTML = 'Click to start'.toUpperCase();
+    //startText.innerHTML = 'Click to start'.toUpperCase();
 
     setOverlay('clickableState', startText, event => {
         connect();
@@ -1030,6 +1030,7 @@ function playStream() {
 }
 
 function playVideo() {
+    parent.postMessage("streamopened", "*");
     webRtcPlayerObj.video.play().catch((onRejectedReason) => {
         if (webRtcPlayerObj.audio.srcObject) {
             webRtcPlayerObj.audio.stop();
@@ -2534,11 +2535,11 @@ function start(isReconnection) {
     if (statsDiv) {
         statsDiv.innerHTML = 'Not connected';
     }
+    shouldShowPlayOverlay = isReconnection;
 
     if (!connect_on_load || isReconnection) {
         showConnectOverlay();
         invalidateFreezeFrameOverlay();
-        shouldShowPlayOverlay = true;
         resizePlayerStyle();
     } else {
         connect();
@@ -2722,6 +2723,7 @@ function restartStream() {
 
 function closeStream() {
     console.log("----------------------Closing stream----------------------")
+    shouldShowPlayOverlay = true;
     if (webRtcPlayerObj) {
         // Remove video element from the page.
         let playerDiv = document.getElementById('player');
@@ -2740,6 +2742,7 @@ function closeStream() {
         webRtcPlayerObj.close();
         webRtcPlayerObj = undefined;
     }
+    parent.postMessage("streamclosed", "*");
 }
 
 function load() {
